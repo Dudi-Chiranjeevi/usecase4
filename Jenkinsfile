@@ -25,13 +25,3 @@ pipeline {
             }
         }
     }
-
-    post {
-        success {
-            echo '✅ File transfer completed successfully!'
-        }
-        failure {
-            echo '❌ File transfer failed.'
-        }
-    }
-}
