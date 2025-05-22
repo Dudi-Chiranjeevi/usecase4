@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        GIT_REPO = 'https://github.com/Dudi-Chiranjeevi/usecase4.git'
+        GIT_REPO = 'https://github.com/your-username/csv-transfer-job.git'
         BRANCH = 'main'
-        DEST_USER = 'cdudi'
-        DEST_HOST = '35.225.255.73'
-        DEST_PATH = '/home/cdudi'
+        DEST_USER = 'cdudi'                      // Update with your actual VM2 username
+        DEST_HOST = '35.225.255.73'           // Replace with actual VM2 IP
+        DEST_PATH = '/home/cdudi/'              // Update as needed
         FILE_NAME = 'data.csv'
     }
 
@@ -20,14 +20,13 @@ pipeline {
         stage('Transfer CSV File') {
             steps {
                 script {
-                    def psScript = """
-                    powershell -File transfer.ps1 `
-                      -DestinationUser ${env.DEST_USER} `
-                      -DestinationHost ${env.DEST_HOST} `
-                      -CsvFilePath ${env.FILE_NAME} `
-                      -TargetPath ${env.DEST_PATH}
+                    sh """
+                        pwsh -File transfer.ps1 `
+                            -DestinationUser ${DEST_USER} `
+                            -DestinationHost ${DEST_HOST} `
+                            -CsvFilePath ${FILE_NAME} `
+                            -TargetPath ${DEST_PATH}
                     """
-                    sh psScript
                 }
             }
         }
