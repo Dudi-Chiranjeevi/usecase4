@@ -15,14 +15,20 @@ pipeline {
     }
 
     stages {
-        stage('Clone GitHub Repo') {
+        stage('Checkout SCM') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Log Git Status') {
             steps {
                 script {
                     sh """
                         mkdir -p logs
-                        echo "===== Clone GitHub Repo Stage =====" >> ${LOG_FILE}
-                        git clone -b "${params.BRANCH}" "${params.GIT_REPO}" >> ${LOG_FILE} 2>&1
-                        echo "Git clone completed at \$(date)" >> ${LOG_FILE}
+                        echo "===== Git Status =====" >> ${LOG_FILE}
+                        git status >> ${LOG_FILE} 2>&1
+                        echo "Git status logged at \$(date)" >> ${LOG_FILE}
                     """
                 }
             }
