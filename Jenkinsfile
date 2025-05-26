@@ -26,12 +26,12 @@ pipeline {
         }
 
         post {
-        success {
-            archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
+            success {
+                archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
  
-            emailext(
-                subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: """
+                emailext(
+                    subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                    body: """
                         Job succeeded.
  
                         Job: ${env.JOB_NAME}
@@ -61,4 +61,4 @@ pipeline {
         }
     }
 }
-    }
+
