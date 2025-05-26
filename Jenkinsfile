@@ -18,13 +18,12 @@ pipeline {
         stage('Clone GitHub Repo') {
             steps {
                 script {
-                    sh '''
-                    mkdir -p logs
-                    echo "===== Clone GitHub Repo Stage =====" >> ${LOG_FILE}
-                    git_output=$(git clone -b "${BRANCH}" "${GIT_REPO}" 2>&1)
-                    echo "$git_output" >> ${LOG_FILE}
-                    echo "Git clone completed at $(date)" >> ${LOG_FILE}
-                    '''
+                    sh """
+                        mkdir -p logs
+                        echo "===== Clone GitHub Repo Stage =====" >> ${LOG_FILE}
+                        git clone -b "${params.BRANCH}" "${params.GIT_REPO}" >> ${LOG_FILE} 2>&1
+                        echo "Git clone completed at \$(date)" >> ${LOG_FILE}
+                    """
                 }
             }
         }
@@ -32,64 +31,38 @@ pipeline {
         stage('Transfer CSV File') {
             steps {
                 script {
-                    sh '''
-                    echo "===== Transfer CSV File Stage =====" >> ${LOG_FILE}
-                    pwsh_output=$(pwsh -Command "& { ./transfer.ps1 -DestinationUser \\"${DEST_USER}\\" -DestinationHost \\"${DEST_HOST}\\" -CsvFilePath \\"${FILE_NAME}\\" -TargetPath \\"${DEST_PATH}\\" }" 2>&1)
-                    echo "$pwsh_output" >> ${LOG_FILE}
-                    echo "Transfer completed at $(date)" >> ${LOG_FILE}
-                    '''
+                    sh """
+                        echo "===== Transfer CSV File Stage =====" >> ${LOG_FILE}
+                        pwsh -Command "& { ./transfer.ps1 -DestinationUser '${params.DEST_USER}' -DestinationHost '${params.DEST_HOST}' -CsvFilePath '${params.FILE_NAME}' -TargetPath '${params.DEST_PATH}' }" >> ${LOG_FILE} 2>&1
+                        echo "Transfer completed at \$(date)" >> ${LOG_FILE}
+                    """
                 }
             }
         }
     }
 
     post {
+        always {
+            script {
+                def summaryLog = "logs/build_history.log"
+                def buildInfo = "Build #${env.BUILD_NUMBER} | Status: ${currentBuild.currentResult} | Time: ${new Date().format("yyyy-MM-dd HH:mm:ss")}"
 
-    always {
+                sh "mkdir -p logs"
+                sh "echo '${buildInfo}' >> ${summaryLog}"
 
-        script {
+                archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
 
-            def summaryLog = "logs/build_history.log"
-
-            def buildInfo = "Build #${env.BUILD_NUMBER} | Status: ${currentBuild.currentResult} | Time: ${new Date().format("yyyy-MM-dd HH:mm:ss")}"
-
-            // Ensure logs dir exists
-
-            sh "mkdir -p logs"
-
-            // Append current build info to the cumulative build log
-
-            sh "echo '${buildInfo}' >> ${summaryLog}"
-
-            // Archive both logs
-
-            archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
- 
-            // Send email with the main transfer log attached
-
-            emailext(
-
-                subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-
-                body: """<p>Job ${currentBuild.currentResult}.</p>
+                emailext(
+                    subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                    body: """<p>Job ${currentBuild.currentResult}.</p>
 <p>Job: ${env.JOB_NAME}<br/>
-
 Build Number: ${env.BUILD_NUMBER}<br/>
 <a href='${env.BUILD_URL}'>View Build</a></p>""",
-
-                to: 'chiranjeevigen@gmail.com',
-
-                from: 'chiranjeevidudi3005@gmail.com',
-
-                attachmentsPattern: 'logs/transfer.log'
-
-            )
-
+                    to: 'chiranjeevigen@gmail.com',
+                    from: 'chiranjeevidudi3005@gmail.com',
+                    attachmentsPattern: 'logs/transfer.log'
+                )
+            }
         }
-
     }
-
-}
-
- 
 }
