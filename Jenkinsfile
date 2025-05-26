@@ -20,7 +20,10 @@ pipeline {
         stage('Transfer CSV File') {
             steps {
                 sh '''
-                    pwsh -Command "& { ./transfer.ps1 -DestinationUser \\"${DEST_USER}\\" -DestinationHost \\"${DEST_HOST}\\" -CsvFilePath \\"${FILE_NAME}\\" -TargetPath \\"${DEST_PATH}\\" }"
+                pwsh -Command "& { ./transfer.ps1 -DestinationUser \\"${DEST_USER}\\" -DestinationHost \\"${DEST_HOST}\\" -CsvFilePath \\"${FILE_NAME}\\" -TargetPath \\"${DEST_PATH}\\" }"
+
+                mkdir -p logs
+                echo "Transfer completed at $(date)" > logs/transfer.log
                 '''
             }
         }
@@ -28,28 +31,40 @@ pipeline {
 
     post {
         success {
-            archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
+            script {
+                if (fileExists('logs/transfer.log')) {
+                    archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
+                } else {
+                    echo "No logs found to archive."
+                }
+            }
 
             emailext(
                 subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                 body: """<p>Job succeeded.</p>
 <p>Job: ${env.JOB_NAME}<br/>
 Build Number: ${env.BUILD_NUMBER}<br/>
-<a href='${env.BUILD_URL}'>Click here</a> to see the build output.</p>""",
+<a href='${env.BUILD_URL}'>View Build</a></p>""",
                 to: 'chiranjeevigen@gmail.com',
                 from: 'chiranjeevidudi3005@gmail.com'
             )
         }
 
         failure {
-            archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
+            script {
+                if (fileExists('logs/transfer.log')) {
+                    archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
+                } else {
+                    echo "No logs found to archive."
+                }
+            }
 
             emailext(
                 subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                 body: """<p>Job failed.</p>
 <p>Job: ${env.JOB_NAME}<br/>
 Build Number: ${env.BUILD_NUMBER}<br/>
-<a href='${env.BUILD_URL}'>Click here</a> to see the build output.</p>""",
+<a href='${env.BUILD_URL}'>View Build</a></p>""",
                 to: 'chiranjeevigen@gmail.com',
                 from: 'chiranjeevidudi3005@gmail.com'
             )
