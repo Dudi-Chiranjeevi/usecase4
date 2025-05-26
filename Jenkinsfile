@@ -32,42 +32,46 @@ pipeline {
     post {
         success {
             script {
-                if (fileExists('logs/transfer.log')) {
-                    archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
-                } else {
-                    echo "No logs found to archive."
-                }
-            }
+                def logFile = 'logs/transfer.log'
+                if (fileExists(logFile)) {
+                    archiveArtifacts artifacts: logFile, fingerprint: true
 
-            emailext(
-                subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: """<p>Job succeeded.</p>
+                    emailext(
+                        subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                        body: """<p>Job succeeded.</p>
 <p>Job: ${env.JOB_NAME}<br/>
 Build Number: ${env.BUILD_NUMBER}<br/>
 <a href='${env.BUILD_URL}'>View Build</a></p>""",
-                to: 'chiranjeevigen@gmail.com',
-                from: 'chiranjeevidudi3005@gmail.com'
-            )
+                        to: 'chiranjeevigen@gmail.com',
+                        from: 'chiranjeevidudi3005@gmail.com',
+                        attachmentsPattern: logFile
+                    )
+                } else {
+                    echo "No log file found to attach."
+                }
+            }
         }
 
         failure {
             script {
-                if (fileExists('logs/transfer.log')) {
-                    archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
-                } else {
-                    echo "No logs found to archive."
-                }
-            }
+                def logFile = 'logs/transfer.log'
+                if (fileExists(logFile)) {
+                    archiveArtifacts artifacts: logFile, fingerprint: true
 
-            emailext(
-                subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                body: """<p>Job failed.</p>
+                    emailext(
+                        subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                        body: """<p>Job failed.</p>
 <p>Job: ${env.JOB_NAME}<br/>
 Build Number: ${env.BUILD_NUMBER}<br/>
 <a href='${env.BUILD_URL}'>View Build</a></p>""",
-                to: 'chiranjeevigen@gmail.com',
-                from: 'chiranjeevidudi3005@gmail.com'
-            )
+                        to: 'chiranjeevigen@gmail.com',
+                        from: 'chiranjeevidudi3005@gmail.com',
+                        attachmentsPattern: logFile
+                    )
+                } else {
+                    echo "No log file found to attach."
+                }
+            }
         }
     }
 }
