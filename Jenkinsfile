@@ -5,7 +5,7 @@ pipeline {
         string(name: 'GIT_REPO', defaultValue: 'https://github.com/Dudi-Chiranjeevi/usecase4.git', description: 'GitHub repository URL')
         string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch to checkout')
         string(name: 'DEST_USER', defaultValue: 'cdudi', description: 'Destination username')
-        string(name: 'DEST_HOST', defaultValue: '34.58.18.138', description: 'Destination host IP')
+        string(name: 'DEST_HOST', defaultValue: '10.128.0.28', description: 'Destination host IP')
         string(name: 'DEST_PATH', defaultValue: '/home/cdudi/', description: 'Destination path on remote host')
         string(name: 'FILE_NAME', defaultValue: 'data1.csv', description: 'File to transfer')
     }
