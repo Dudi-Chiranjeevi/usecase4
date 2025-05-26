@@ -24,4 +24,41 @@ pipeline {
                 '''
             }
         }
+
+        post {
+        success {
+            archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
+ 
+            emailext(
+                subject: "SUCCESS: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: """
+                        Job succeeded.
+ 
+                        Job: ${env.JOB_NAME}
+                        Build Number: ${env.BUILD_NUMBER}
+                        Check console output at: ${env.BUILD_URL}
+                    """,
+                to: 'chiranjeevigen@gmail.com',
+                from: 'chiranjeevidudi3005@gmail.com'
+            )
+        }
+ 
+        failure {
+            archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
+ 
+            emailext(
+                subject: "FAILURE: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+                body: """
+                        Job failed.
+ 
+                        Job: ${env.JOB_NAME}
+                        Build Number: ${env.BUILD_NUMBER}
+                        Check console output at: ${env.BUILD_URL}
+                    """,
+                to: 'chiranjeevigen@gmail.com',
+                from: 'chiranjeevidudi3005@gmail.com'
+            )
+        }
+    }
+}
     }
