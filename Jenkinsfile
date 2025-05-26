@@ -7,7 +7,7 @@ pipeline {
         string(name: 'DEST_USER', defaultValue: 'cdudi', description: 'Destination username')
         string(name: 'DEST_HOST', defaultValue: '10.128.0.28', description: 'Destination host IP')
         string(name: 'DEST_PATH', defaultValue: '/home/cdudi/', description: 'Destination path on remote host')
-        string(name: 'FILE_NAME', defaultValue: 'data1.csv', description: 'File to transfer')
+        string(name: 'FILE_NAME', defaultValue: 'data2.csv', description: 'File to transfer')
     }
 
     environment {
