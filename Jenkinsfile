@@ -44,26 +44,52 @@ pipeline {
     }
 
     post {
-        always {
-            script {
-                def logFile = "${LOG_FILE}"
-                if (fileExists(logFile)) {
-                    archiveArtifacts artifacts: logFile, fingerprint: true
 
-                    emailext(
-                        subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
-                        body: """<p>Job ${currentBuild.currentResult}.</p>
+    always {
+
+        script {
+
+            def summaryLog = "logs/build_history.log"
+
+            def buildInfo = "Build #${env.BUILD_NUMBER} | Status: ${currentBuild.currentResult} | Time: ${new Date().format("yyyy-MM-dd HH:mm:ss")}"
+
+            // Ensure logs dir exists
+
+            sh "mkdir -p logs"
+
+            // Append current build info to the cumulative build log
+
+            sh "echo '${buildInfo}' >> ${summaryLog}"
+
+            // Archive both logs
+
+            archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
+ 
+            // Send email with the main transfer log attached
+
+            emailext(
+
+                subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+
+                body: """<p>Job ${currentBuild.currentResult}.</p>
 <p>Job: ${env.JOB_NAME}<br/>
+
 Build Number: ${env.BUILD_NUMBER}<br/>
 <a href='${env.BUILD_URL}'>View Build</a></p>""",
-                        to: 'chiranjeevigen@gmail.com',
-                        from: 'chiranjeevidudi3005@gmail.com',
-                        attachmentsPattern: logFile
-                    )
-                } else {
-                    echo "No log file found to attach."
-                }
-            }
+
+                to: 'chiranjeevigen@gmail.com',
+
+                from: 'chiranjeevidudi3005@gmail.com',
+
+                attachmentsPattern: 'logs/transfer.log'
+
+            )
+
         }
+
     }
+
+}
+
+ 
 }
