@@ -53,26 +53,37 @@ pipeline {
         //     }
         // }
 
+//         stage('Transfer CSV File to Multiple Hosts') {
+//             steps {
+//                 script {
+//                     sh """
+//                 echo "===== Transfer CSV File to Multiple Hosts =====" >> ${LOG_FILE}
+//                 pwsh -Command \"
+//                     ./transfer.ps1 `
+//                         -DestinationUser '${params.DEST_USER}' `
+//                         -DestinationHosts @('${params.DEST_HOST1}', '${params.DEST_HOST2}') `
+//                         -CsvFilePath '${params.FILE_NAME}' `
+//                         -TargetPath '${params.DEST_PATH}'
+//                 \"
+//                 echo "Transfer completed at \$(date)" >> ${LOG_FILE}
+//             """
+//         }
+//     }
+// }
+
+    }
+
         stage('Transfer CSV File to Multiple Hosts') {
             steps {
                 script {
                     sh """
                 echo "===== Transfer CSV File to Multiple Hosts =====" >> ${LOG_FILE}
-                pwsh -Command \"
-                    ./transfer.ps1 `
-                        -DestinationUser '${params.DEST_USER}' `
-                        -DestinationHosts @('${params.DEST_HOST1}', '${params.DEST_HOST2}') `
-                        -CsvFilePath '${params.FILE_NAME}' `
-                        -TargetPath '${params.DEST_PATH}'
-                \"
+                pwsh -NoProfile -Command "\$ErrorActionPreference = 'Stop'; ./transfer.ps1 -DestinationUser '${params.DEST_USER}' -DestinationHosts @('${params.DEST_HOST1}', '${params.DEST_HOST2}') -CsvFilePath '${params.FILE_NAME}' -TargetPath '${params.DEST_PATH}'" >> ${LOG_FILE} 2>&1
                 echo "Transfer completed at \$(date)" >> ${LOG_FILE}
             """
+                }
+            }
         }
-    }
-}
-
-    }
-
 
     post {
         always {
