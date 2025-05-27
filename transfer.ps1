@@ -42,7 +42,7 @@
 # transfer.ps1
 param (
     [string]$DestinationUser = "cdudi",
-    [string]$DestinationHost = "10.128.0.28",
+    [string]$DestinationHost = "10.128.0.24",
     [string]$CsvFilePath = "data3.csv",
     [string]$TargetPath = "/home/cdudi/"
 )
