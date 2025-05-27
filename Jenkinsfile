@@ -6,7 +6,6 @@ pipeline {
         string(name: 'BRANCH', defaultValue: 'main', description: 'Git branch to checkout')
         string(name: 'DEST_USER', defaultValue: 'cdudi', description: 'Destination username')
         string(name: 'DEST_HOST_1', defaultValue: '10.128.0.28', description: 'First destination host IP')
-        string(name: 'DEST_HOST_2', defaultValue: '10.128.0.24', description: 'Second destination host IP')
         string(name: 'DEST_PATH', defaultValue: '/home/cdudi/', description: 'Destination path on remote host')
         string(name: 'FILE_NAME', defaultValue: 'data4.csv', description: 'File to transfer')
     }
