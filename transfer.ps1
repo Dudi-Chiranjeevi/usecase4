@@ -117,41 +117,55 @@
 #     Write-Host "`n✅ All transfers completed successfully."
 # }
 
+# 
+
 param (
     [string]$DestinationUser,
     [string]$DestinationHosts,
     [string]$CsvFilePath,
-    [string]$TargetPath,
-    [int]$MaxRetries = 1
+    [string]$TargetPath
 )
-
-# Convert comma-separated host string into an array
+ 
+# Convert comma-separated host string into array
 $hosts = $DestinationHosts -split ','
-
-foreach ($hostIp in $hosts) {
-    $retryCount = 0
-    $success = $false
-
-    while (-not $success -and $retryCount -lt $MaxRetries) {
-        try {
-            $destination = "$DestinationUser@${hostIp}:${TargetPath}"
-            Write-Host "Transferring $CsvFilePath to $destination"
-            
-            # Replace this with actual transfer command
-            # Example: scp $CsvFilePath "$destination"
-            # Simulating transfer with echo
-            Write-Host "scp $CsvFilePath $destination"
-
-            $success = $true
-        } catch {
-            Write-Host "Transfer to $hostIp failed. Retry #$($retryCount + 1)"
-            $retryCount++
-            Start-Sleep -Seconds 2
+ 
+$jobs = @{}
+ 
+foreach ($host in $hosts) {
+    $jobs[$host] = Start-Job -ScriptBlock {
+        param ($CsvFilePath, $DestinationUser, $HostIp, $TargetPath)
+        $destination = "$DestinationUser@$HostIp:$TargetPath"
+        Write-Host "Transferring $CsvFilePath to $destination"
+ 
+        & scp -o StrictHostKeyChecking=no $CsvFilePath $destination
+ 
+        if ($LASTEXITCODE -ne 0) {
+            throw "Transfer failed to $HostIp"
         }
+ 
+    } -ArgumentList $CsvFilePath, $DestinationUser, $host, $TargetPath
+}
+ 
+$failed = @()
+ 
+foreach ($host in $jobs.Keys) {
+    $job = $jobs[$host]
+    Wait-Job $job | Out-Null
+ 
+    try {
+        Receive-Job $job -ErrorAction Stop | Out-Null
+        Write-Host "✅ Transfer succeeded to $host"
+    } catch {
+        Write-Host "❌ Transfer failed to $host"
+        $failed += $host
     }
-
-    if (-not $success) {
-        Write-Host "Transfer to $hostIp failed after $MaxRetries retries."
-        exit 1
-    }
+ 
+    Remove-Job $job
+}
+ 
+if ($failed.Count -gt 0) {
+    Write-Host "`n❌ Transfer failed for: $($failed -join ', ')"
+    exit 1
+} else {
+    Write-Host "`n✅ All transfers completed successfully."
 }
