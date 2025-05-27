@@ -119,6 +119,57 @@
 
 # 
 
+# param (
+#     [string]$DestinationUser,
+#     [string]$DestinationHosts,
+#     [string]$CsvFilePath,
+#     [string]$TargetPath
+# )
+ 
+# # Convert comma-separated host string into array
+# $hosts = $DestinationHosts -split ','
+ 
+# $jobs = @{}
+ 
+# foreach ($host in $hosts) {
+#     $jobs[$host] = Start-Job -ScriptBlock {
+#         param ($CsvFilePath, $DestinationUser, $HostIp, $TargetPath)
+#         $destination = "${ DestinationUser }@${ HostIp }:${ TargetPath }"
+#         Write-Host "Transferring $CsvFilePath to $destination"
+ 
+#         & scp -o StrictHostKeyChecking=no $CsvFilePath $destination
+ 
+#         if ($LASTEXITCODE -ne 0) {
+#             throw "Transfer failed to $HostIp"
+#         }
+ 
+#     } -ArgumentList $CsvFilePath, $DestinationUser, $host, $TargetPath
+# }
+ 
+# $failed = @()
+ 
+# foreach ($host in $jobs.Keys) {
+#     $job = $jobs[$host]
+#     Wait-Job $job | Out-Null
+ 
+#     try {
+#         Receive-Job $job -ErrorAction Stop | Out-Null
+#         Write-Host "✅ Transfer succeeded to $host"
+#     } catch {
+#         Write-Host "❌ Transfer failed to $host"
+#         $failed += $host
+#     }
+ 
+#     Remove-Job $job
+# }
+ 
+# if ($failed.Count -gt 0) {
+#     Write-Host "`n❌ Transfer failed for: $($failed -join ', ')"
+#     exit 1
+# } else {
+#     Write-Host "`n✅ All transfers completed successfully."
+# }
+
 param (
     [string]$DestinationUser,
     [string]$DestinationHosts,
@@ -126,46 +177,17 @@ param (
     [string]$TargetPath
 )
  
-# Convert comma-separated host string into array
-$hosts = $DestinationHosts -split ','
+$hostIps = $DestinationHosts -split ','
  
-$jobs = @{}
- 
-foreach ($host in $hosts) {
-    $jobs[$host] = Start-Job -ScriptBlock {
-        param ($CsvFilePath, $DestinationUser, $HostIp, $TargetPath)
-        $destination = "${ DestinationUser }@${ HostIp }:${ TargetPath }"
-        Write-Host "Transferring $CsvFilePath to $destination"
- 
-        & scp -o StrictHostKeyChecking=no $CsvFilePath $destination
- 
-        if ($LASTEXITCODE -ne 0) {
-            throw "Transfer failed to $HostIp"
-        }
- 
-    } -ArgumentList $CsvFilePath, $DestinationUser, $host, $TargetPath
-}
- 
-$failed = @()
- 
-foreach ($host in $jobs.Keys) {
-    $job = $jobs[$host]
-    Wait-Job $job | Out-Null
- 
+foreach ($hostIp in $hostIps) {
     try {
-        Receive-Job $job -ErrorAction Stop | Out-Null
-        Write-Host "✅ Transfer succeeded to $host"
+        $destination = "${DestinationUser}@${hostIp}:${TargetPath}"
+        Write-Host "Transferring $CsvFilePath to $destination"
+        scp -o StrictHostKeyChecking=no $CsvFilePath $destination
     } catch {
-        Write-Host "❌ Transfer failed to $host"
-        $failed += $host
+        Write-Host "Transfer to $hostIp failed."
+        exit 1
     }
- 
-    Remove-Job $job
 }
  
-if ($failed.Count -gt 0) {
-    Write-Host "`n❌ Transfer failed for: $($failed -join ', ')"
-    exit 1
-} else {
-    Write-Host "`n✅ All transfers completed successfully."
-}
+Write-Host "✅ All transfers completed successfully."
