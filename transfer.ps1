@@ -1,7 +1,7 @@
 param (
     [string]$DestinationUser = "cdudi",
-    [string[]]$DestinationHosts = @("10.128.0.28", "10.128.0.29"),
-    [string]$CsvFilePath = "data3.csv",
+    [string[]]$DestinationHosts = @("10.128.0.28", "10.128.0.24"),
+    [string]$CsvFilePath = "data4.csv",
     [string]$TargetPath = "/home/cdudi/"
 )
 
