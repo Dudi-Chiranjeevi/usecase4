@@ -803,19 +803,121 @@
 //     }
 // }
 
+// pipeline {
+
+//     agent any
+ 
+//     parameters {
+
+//         string(name: 'DEST_USER', defaultValue: 'cdudi')
+
+//         string(name: 'DEST_HOSTS', defaultValue: '10.128.0.24,10.128.0.28')
+
+//         string(name: 'DEST_PATH', defaultValue: '/home/cdudi/')
+
+//         string(name: 'FILE_NAME', defaultValue: 'data4.csv')
+
+//     }
+ 
+//     environment {
+
+//         LOG_FILE = 'logs/transfer.log'
+
+//     }
+ 
+//     stages {
+
+//         stage('Checkout SCM') {
+
+//             steps {
+
+//                 checkout scm
+
+//             }
+
+//         }
+ 
+//         stage('Transfer CSV File to Multiple VMs') {
+
+//             steps {
+
+//                 script {
+
+//                     sh """
+
+//                         mkdir -p logs
+
+//                         echo "===== Transfer Start =====" >> ${LOG_FILE}
+
+//                         pwsh -File ./transfer.ps1 `
+
+//                             -DestinationUser '${params.DEST_USER}' `
+
+//                             -DestinationHosts '${params.DEST_HOSTS}' `
+
+//                             -CsvFilePath '${params.FILE_NAME}' `
+
+//                             -TargetPath '${params.DEST_PATH}' >> ${LOG_FILE} 2>&1
+
+//                         echo "===== Transfer End =====" >> ${LOG_FILE}
+
+//                     """
+
+//                 }
+
+//             }
+
+//         }
+
+//     }
+ 
+//     post {
+
+//         always {
+
+//             archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
+ 
+//             emailext(
+
+//                 subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
+
+//                 body: """
+// <p>Job ${currentBuild.currentResult}</p>
+// <p>Job: ${env.JOB_NAME}<br/>
+
+//                     Build Number: ${env.BUILD_NUMBER}<br/>
+// <a href='${env.BUILD_URL}'>View Build</a></p>
+
+//                 """,
+
+//                 to: 'chiranjeevigen@gmail.com',
+
+//                 from: 'chiranjeevidudi3005@gmail.com',
+
+//                 attachmentsPattern: 'logs/transfer.log'
+
+//             )
+
+//         }
+
+//     }
+
+// }
+
+
 pipeline {
 
     agent any
  
     parameters {
 
-        string(name: 'DEST_USER', defaultValue: 'cdudi')
+        string(name: 'DEST_USER', defaultValue: 'cdudi', description: 'Destination username')
 
-        string(name: 'DEST_HOSTS', defaultValue: '10.128.0.24,10.128.0.28')
+        string(name: 'DEST_HOSTS', defaultValue: '10.128.0.24,10.128.0.28', description: 'Comma-separated destination IPs')
 
-        string(name: 'DEST_PATH', defaultValue: '/home/cdudi/')
+        string(name: 'DEST_PATH', defaultValue: '/home/cdudi/', description: 'Target path on remote hosts')
 
-        string(name: 'FILE_NAME', defaultValue: 'data4.csv')
+        string(name: 'FILE_NAME', defaultValue: 'data4.csv', description: 'CSV file to transfer')
 
     }
  
@@ -837,31 +939,23 @@ pipeline {
 
         }
  
-        stage('Transfer CSV File to Multiple VMs') {
+        stage('Transfer CSV File (PowerShell)') {
 
             steps {
 
                 script {
 
-                    sh """
+                    sh '''
 
                         mkdir -p logs
 
                         echo "===== Transfer Start =====" >> ${LOG_FILE}
 
-                        pwsh -File ./transfer.ps1 `
-
-                            -DestinationUser '${params.DEST_USER}' `
-
-                            -DestinationHosts '${params.DEST_HOSTS}' `
-
-                            -CsvFilePath '${params.FILE_NAME}' `
-
-                            -TargetPath '${params.DEST_PATH}' >> ${LOG_FILE} 2>&1
+                        pwsh -File ./transfer.ps1 -DestinationUser "${DEST_USER}" -DestinationHosts "${DEST_HOSTS}" -CsvFilePath "${FILE_NAME}" -TargetPath "${DEST_PATH}" >> ${LOG_FILE} 2>&1
 
                         echo "===== Transfer End =====" >> ${LOG_FILE}
 
-                    """
+                    '''
 
                 }
 
@@ -881,14 +975,11 @@ pipeline {
 
                 subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
 
-                body: """
-<p>Job ${currentBuild.currentResult}</p>
+                body: """<p>Job ${currentBuild.currentResult}</p>
 <p>Job: ${env.JOB_NAME}<br/>
 
-                    Build Number: ${env.BUILD_NUMBER}<br/>
-<a href='${env.BUILD_URL}'>View Build</a></p>
-
-                """,
+Build Number: ${env.BUILD_NUMBER}<br/>
+<a href='${env.BUILD_URL}'>View Build</a></p>""",
 
                 to: 'chiranjeevigen@gmail.com',
 
