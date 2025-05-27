@@ -230,7 +230,7 @@
 
                                 echo "===== Transfer to ${params.DEST_HOST1} =====" >> ${LOG_FILE}
 
-                                pwsh -NoProfile -Command "\$ErrorActionPreference = 'Stop'; ./transfer.ps1 -DestinationUser '${params.DEST_USER}' -DestinationHosts '${params.DEST_HOST1}' -CsvFilePath '${params.FILE_NAME}' -TargetPath '${params.DEST_PATH}'" >> ${LOG_FILE} 2>&1
+                                pwsh -Command ./transfer.ps1 -DestinationUser '${params.DEST_USER}' -DestinationHosts '${params.DEST_HOST1}' -CsvFilePath '${params.FILE_NAME}' -TargetPath '${params.DEST_PATH}'" >> ${LOG_FILE} 2>&1
 
                                 echo "Transfer to ${params.DEST_HOST1} completed at \$(date)" >> ${LOG_FILE}
 
@@ -252,7 +252,7 @@
 
                                 echo "===== Transfer to ${params.DEST_HOST2} =====" >> ${LOG_FILE}
 
-                                pwsh -NoProfile -Command "\$ErrorActionPreference = 'Stop'; ./transfer.ps1 -DestinationUser '${params.DEST_USER}' -DestinationHosts '${params.DEST_HOST2}' -CsvFilePath '${params.FILE_NAME}' -TargetPath '${params.DEST_PATH}'" >> ${LOG_FILE} 2>&1
+                                pwsh -Command ./transfer.ps1 -DestinationUser '${params.DEST_USER}' -DestinationHosts '${params.DEST_HOST2}' -CsvFilePath '${params.FILE_NAME}' -TargetPath '${params.DEST_PATH}'" >> ${LOG_FILE} 2>&1
 
                                 echo "Transfer to ${params.DEST_HOST2} completed at \$(date)" >> ${LOG_FILE}
 
