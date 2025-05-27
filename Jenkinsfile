@@ -427,34 +427,52 @@
 
  
 
- pipeline {
+// 
 
+pipeline {
+ 
     agent any
-
+ 
     parameters {
         string(name: 'DEST_USER', defaultValue: 'cdudi', description: 'Destination username')
         string(name: 'DEST_HOSTS', defaultValue: '10.128.0.24,10.128.0.28', description: 'Comma-separated destination IPs')
         string(name: 'DEST_PATH', defaultValue: '/home/cdudi/', description: 'Target path on remote hosts')
         string(name: 'FILE_NAME', defaultValue: 'data4.csv', description: 'CSV file to transfer')
     }
-
+ 
     environment {
         LOG_FILE = 'logs/transfer.log'
     }
-
+ 
     stages {
-
+ 
         stage('Checkout SCM') {
             steps {
                 checkout scm
             }
         }
-
-        stage('Transfer CSV File (Parallel w/ 1 Retry)') {
+ 
+        stage('Validate CSV File') {
             steps {
                 script {
                     sh """
                         mkdir -p logs
+                        echo "===== Validating CSV File =====" >> ${LOG_FILE}
+                        if [ ! -f '${params.FILE_NAME}' ]; then
+                            echo 'ERROR: File ${params.FILE_NAME} not found in workspace!' >> ${LOG_FILE}
+                            exit 1
+                        else
+                            echo 'Found file: ${params.FILE_NAME}' >> ${LOG_FILE}
+                        fi
+                    """
+                }
+            }
+        }
+ 
+        stage('Transfer CSV File (Parallel w/ 1 Retry)') {
+            steps {
+                script {
+                    sh """
                         echo "===== Transfer Start =====" >> ${LOG_FILE}
                         pwsh -File ./transfer.ps1 -DestinationUser '${params.DEST_USER}' -DestinationHosts '${params.DEST_HOSTS}' -CsvFilePath '${params.FILE_NAME}' -TargetPath '${params.DEST_PATH}' -MaxRetries 1 >> ${LOG_FILE} 2>&1
                         echo "===== Transfer End =====" >> ${LOG_FILE}
@@ -463,11 +481,11 @@
             }
         }
     }
-
+ 
     post {
         always {
             archiveArtifacts artifacts: 'logs/*.log', fingerprint: true
-
+ 
             emailext(
                 subject: "${currentBuild.currentResult}: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'",
                 body: """<p>Job ${currentBuild.currentResult}</p>
