@@ -259,6 +259,7 @@ pipeline {
         string(name: 'FILE_NAME', defaultValue: 'data4.csv', description: 'File to transfer')
     }
 
+
     environment {
         LOG_FILE = 'logs/transfer.log'
     }
