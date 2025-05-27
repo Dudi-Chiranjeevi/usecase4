@@ -170,24 +170,38 @@
 #     Write-Host "`n✅ All transfers completed successfully."
 # }
 
+# param (
+#     [string]$DestinationUser,
+#     [string]$DestinationHosts,
+#     [string]$CsvFilePath,
+#     [string]$TargetPath
+# )
+ 
+# $hostIps = $DestinationHosts -split ','
+ 
+# foreach ($hostIp in $hostIps) {
+#     try {
+#         $destination = "${DestinationUser}@${hostIp}:${TargetPath}"
+#         Write-Host "Transferring $CsvFilePath to $destination"
+#         scp -o StrictHostKeyChecking=no $CsvFilePath $destination
+#     } catch {
+#         Write-Host "Transfer to $hostIp failed."
+#         exit 1
+#     }
+# }
+ 
+# Write-Host "✅ All transfers completed successfully."
+
+# transfer.ps1
 param (
     [string]$DestinationUser,
-    [string]$DestinationHosts,
-    [string]$CsvFilePath,
-    [string]$TargetPath
+    [string]$DestinationHost ,
+    [string]$CsvFilePath ,
+    [string]$TargetPath"
 )
  
-$hostIps = $DestinationHosts -split ','
+# Compose destination string with proper variable expansion
+$destination = "${DestinationUser}@${DestinationHost}:$TargetPath"
  
-foreach ($hostIp in $hostIps) {
-    try {
-        $destination = "${DestinationUser}@${hostIp}:${TargetPath}"
-        Write-Host "Transferring $CsvFilePath to $destination"
-        scp -o StrictHostKeyChecking=no $CsvFilePath $destination
-    } catch {
-        Write-Host "Transfer to $hostIp failed."
-        exit 1
-    }
-}
- 
-Write-Host "✅ All transfers completed successfully."
+# Run scp command with strict host key checking disabled
+scp -o StrictHostKeyChecking=no $CsvFilePath $destination
