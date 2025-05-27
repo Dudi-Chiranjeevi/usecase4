@@ -134,7 +134,7 @@ $jobs = @{}
 foreach ($host in $hosts) {
     $jobs[$host] = Start-Job -ScriptBlock {
         param ($CsvFilePath, $DestinationUser, $HostIp, $TargetPath)
-        $destination = "$DestinationUser@$HostIp:$TargetPath"
+        $destination = "${ DestinationUser }@${ HostIp }:${ TargetPath }"
         Write-Host "Transferring $CsvFilePath to $destination"
  
         & scp -o StrictHostKeyChecking=no $CsvFilePath $destination
