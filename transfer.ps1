@@ -43,7 +43,7 @@
 param (
     [string]$DestinationUser = "cdudi",
     [string]$DestinationHost = "10.128.0.24",
-    [string]$CsvFilePath = "data3.csv",
+    [string]$CsvFilePath = "data4.csv",
     [string]$TargetPath = "/home/cdudi/"
 )
 
