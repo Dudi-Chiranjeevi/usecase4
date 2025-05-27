@@ -13,10 +13,10 @@
 # scp -o StrictHostKeyChecking=no $CsvFilePath $destination
 
 param (
-    [string]$DestinationUser = "cdudi",
-    [string[]]$DestinationHosts = @("10.128.0.28", "10.128.0.24"),
-    [string]$CsvFilePath = "data4.csv",
-    [string]$TargetPath = "/home/cdudi/"
+    [string]$DestinationUser,
+    [string[]]$DestinationHosts,
+    [string]$CsvFilePath,
+    [string]$TargetPath
 )
 
 foreach ($DestinationHost in $DestinationHosts) {
